@@ -12,6 +12,7 @@ export function PopupEpisodes({ episodes }) {
   useEffect(() => {
     if (!episodes?.length) {
       setIsFetching(false);
+
       return;
     }
 
