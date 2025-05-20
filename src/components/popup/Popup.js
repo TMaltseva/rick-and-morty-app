@@ -1,7 +1,9 @@
+import React, { useEffect, useCallback, useRef } from 'react';
 import styled, { css } from 'styled-components';
 import { PopupEpisodes } from './PopupEpisodes';
 import { PopupHeader } from './PopupHeader';
 import { PopupInfo } from './PopupInfo';
+import { useScrollLock } from './hooks/useScrollLock';
 
 export function Popup({ settings: { visible, content = {} }, setSettings }) {
   const {
@@ -16,36 +18,73 @@ export function Popup({ settings: { visible, content = {} }, setSettings }) {
     episode: episodes
   } = content;
 
+  const { ScrollLockComponent, lockScroll, unlockScroll } = useScrollLock();
+
+  const closePopup = useCallback(() => {
+    setSettings((prev) => ({ ...prev, visible: false }));
+  }, [setSettings]);
+
   function togglePopup(e) {
     if (e.currentTarget !== e.target) {
       return;
     }
 
-    setSettings((prevState) => ({
-      ...prevState,
-      visible: !prevState.visible
-    }));
+    if (visible) {
+      closePopup();
+    } else {
+      setSettings((prevState) => ({
+        ...prevState,
+        visible: true
+      }));
+    }
   }
 
+  const handleEscapeKey = useCallback(
+    (e) => {
+      if (e.key === 'Escape') {
+        setSettings((prev) => ({ ...prev, visible: false }));
+      }
+    },
+    [setSettings]
+  );
+
+  useEffect(() => {
+    if (visible) {
+      lockScroll();
+      document.addEventListener('keydown', handleEscapeKey);
+    } else {
+      unlockScroll();
+      document.removeEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [visible, lockScroll, unlockScroll, handleEscapeKey]);
+
   return (
-    <PopupContainer visible={visible}>
-      <StyledPopup>
-        <CloseIcon onClick={togglePopup} />
+    <>
+      <ScrollLockComponent />
 
-        <PopupHeader
-          name={name}
-          gender={gender}
-          image={image}
-          status={status}
-          species={species}
-          type={type}
-        />
+      <PopupContainer visible={visible} onClick={togglePopup}>
+        <StyledPopup onClick={(e) => e.stopPropagation()}>
+          <CloseIcon onClick={closePopup} />
 
-        <PopupInfo origin={origin} location={location} />
+          <PopupHeader
+            name={name}
+            gender={gender}
+            image={image}
+            status={status}
+            species={species}
+            type={type}
+          />
 
-        <PopupEpisodes episodes={episodes} />
-      </StyledPopup>
-    </PopupContainer>
+          <PopupInfo origin={origin} location={location} />
+
+          <PopupEpisodes episodes={episodes} />
+        </StyledPopup>
+      </PopupContainer>
+    </>
   );
 }
 
@@ -61,13 +100,13 @@ const PopupContainer = styled.div`
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.3s, visible 0.3s;
+  transition: opacity 0.3s, visibility 0.3s;
 
   ${({ visible }) =>
     visible &&
     css`
       opacity: 1;
-      visibility: initial;
+      visibility: visible;
       pointer-events: all;
     `}
 `;
