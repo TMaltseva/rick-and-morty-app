@@ -42,10 +42,10 @@ export function Popup({ settings: { visible, content = {} }, setSettings }) {
   const handleEscapeKey = useCallback(
     (e) => {
       if (e.key === 'Escape') {
-        setSettings((prev) => ({ ...prev, visible: false }));
+        closePopup();
       }
     },
-    [setSettings]
+    [closePopup]
   );
 
   useEffect(() => {
