@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { PopupEpisodes } from './PopupEpisodes';
 import { PopupHeader } from './PopupHeader';
@@ -20,24 +20,28 @@ export function Popup({ settings: { visible, content = {} }, setSettings }) {
 
   const { ScrollLockComponent, lockScroll, unlockScroll } = useScrollLock();
 
+  const openPopup = useCallback(() => {
+    setSettings((prev) => ({ ...prev, visible: true }));
+  }, [setSettings]);
+
   const closePopup = useCallback(() => {
     setSettings((prev) => ({ ...prev, visible: false }));
   }, [setSettings]);
 
-  function togglePopup(e) {
-    if (e.currentTarget !== e.target) {
-      return;
-    }
+  const togglePopup = useCallback(
+    (e) => {
+      if (e.currentTarget !== e.target) {
+        return;
+      }
 
-    if (visible) {
-      closePopup();
-    } else {
-      setSettings((prevState) => ({
-        ...prevState,
-        visible: true
-      }));
-    }
-  }
+      if (visible) {
+        closePopup();
+      } else {
+        openPopup();
+      }
+    },
+    [visible, closePopup, openPopup]
+  );
 
   const handleEscapeKey = useCallback(
     (e) => {
@@ -47,6 +51,8 @@ export function Popup({ settings: { visible, content = {} }, setSettings }) {
     },
     [closePopup]
   );
+
+  const handlePopupClick = useCallback((e) => e.stopPropagation(), []);
 
   useEffect(() => {
     if (visible) {
@@ -65,11 +71,9 @@ export function Popup({ settings: { visible, content = {} }, setSettings }) {
   return (
     <>
       <ScrollLockComponent />
-
       <PopupContainer visible={visible} onClick={togglePopup}>
-        <StyledPopup onClick={(e) => e.stopPropagation()}>
+        <StyledPopup onClick={handlePopupClick}>
           <CloseIcon onClick={closePopup} />
-
           <PopupHeader
             name={name}
             gender={gender}
@@ -78,9 +82,7 @@ export function Popup({ settings: { visible, content = {} }, setSettings }) {
             species={species}
             type={type}
           />
-
           <PopupInfo origin={origin} location={location} />
-
           <PopupEpisodes episodes={episodes} />
         </StyledPopup>
       </PopupContainer>
