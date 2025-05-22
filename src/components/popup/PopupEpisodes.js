@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 import axios from 'axios';
 import { Loader, Text } from '../common';
-
-const API_EPISODES_URL = 'https://rickandmortyapi.com/api/episode';
+import { API_EPISODES_URL } from '../../api-config';
 
 export function PopupEpisodes({ episodes }) {
   const [series, setSeries] = useState([]);

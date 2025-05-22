@@ -7,8 +7,7 @@ import {
   useCallback
 } from 'react';
 import axios from 'axios';
-
-const API_URL = 'https://rickandmortyapi.com/api/character/';
+import { API_URL } from '../../api-config';
 
 export function DataProvider({ children }) {
   const [activePage, setActivePage] = useState(0);
@@ -39,6 +38,12 @@ export function DataProvider({ children }) {
   useEffect(() => {
     fetchData(apiURL);
   }, [apiURL, fetchData]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const initialUrl = `${API_URL}?${params}`;
+    setApiURL(initialUrl);
+  }, []);
 
   const dataValue = useMemo(
     () => ({
