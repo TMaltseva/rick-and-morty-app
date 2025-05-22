@@ -92,7 +92,7 @@ export function Popup({ settings: { visible, content = {} }, setSettings }) {
 
 const PopupContainer = styled.div`
   position: fixed;
-  z-index: 10;
+  z-index: 10000;
   background: rgba(0, 0, 0, 0.4);
   width: 100%;
   height: 100vh;
