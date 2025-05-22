@@ -2,12 +2,16 @@ import { useCallback, useRef, useEffect, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
 
 const GlobalScrollLock = createGlobalStyle`
+  html {
+    overflow-y: ${({ $isLocked }) => ($isLocked ? 'hidden' : 'auto')};
+  }
+  
   body {
     overflow: ${({ $isLocked }) => ($isLocked ? 'hidden' : 'auto')};
     position: ${({ $isLocked }) => ($isLocked ? 'fixed' : 'static')};
     width: ${({ $isLocked }) => ($isLocked ? '100%' : 'auto')};
     top: ${({ $isLocked, $scrollPosition }) =>
-      $isLocked && $scrollPosition ? `-${$scrollPosition}px` : '0'};
+      $isLocked ? `-${$scrollPosition}px` : '0'};
   }
 `;
 
