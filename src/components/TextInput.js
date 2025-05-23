@@ -35,6 +35,10 @@ const Input = styled.input`
   font-family: 'Inter', sans-serif;
   font-size: 16px;
   transition: all 0.3s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 25px;
 
   &:focus {
     outline: none;

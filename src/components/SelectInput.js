@@ -155,8 +155,8 @@ const OptionsList = styled.ul`
 
 const OptionItem = styled.li`
   display: block;
-  min-height: 30px;
-  padding: 8px;
+  height: 30px;
+  padding: 4px 8px;
   color: #1e1e1e;
   cursor: pointer;
   transition: all 0.3s;
