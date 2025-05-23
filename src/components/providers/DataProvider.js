@@ -15,9 +15,10 @@ export function DataProvider({ children }) {
   const [isFetching, setIsFetching] = useState(false);
   const [isError, setIsError] = useState(false);
   const [info, setInfo] = useState({});
-  const [apiURL, setApiURL] = useState(API_URL);
+  const [apiURL, setApiURL] = useState('');
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const fetchData = useCallback(async (url) => {
+  const fetchData = useCallback((url) => {
     setIsFetching(true);
     setIsError(false);
 
@@ -36,14 +37,22 @@ export function DataProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    fetchData(apiURL);
-  }, [apiURL, fetchData]);
+    if (!isInitialized) {
+      const params = new URLSearchParams(window.location.search);
+      const initialUrl = params.toString()
+        ? `${API_URL}?${params.toString()}`
+        : API_URL;
+
+      setApiURL(initialUrl);
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const initialUrl = `${API_URL}?${params}`;
-    setApiURL(initialUrl);
-  }, []);
+    if (apiURL && isInitialized) {
+      fetchData(apiURL);
+    }
+  }, [apiURL, fetchData, isInitialized]);
 
   const dataValue = useMemo(
     () => ({

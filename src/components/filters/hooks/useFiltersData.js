@@ -46,6 +46,12 @@ export function useFiltersData() {
         .catch((error) => {
           setError(error);
           console.error('Error fetching filter options:', error);
+
+          setOptions({
+            status: ['Alive', 'Dead', 'unknown'],
+            gender: ['Female', 'Male', 'Genderless', 'unknown'],
+            species: ['Human', 'Alien', 'Humanoid', 'unknown']
+          });
         })
         .finally(() => setIsLoading(false));
     };

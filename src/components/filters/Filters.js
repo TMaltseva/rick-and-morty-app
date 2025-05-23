@@ -1,44 +1,64 @@
 import styled from 'styled-components';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { API_URL } from '../../api-config';
 import { useData } from '../providers';
 import { SelectInput } from '../SelectInput';
 import { TextInput } from '../TextInput';
 import { Button } from '../Button';
 import { useFiltersData } from './hooks/useFiltersData';
+import { useUrlSync } from './hooks/useUrlSync';
 import { Text } from '../common';
 
-export function Filters() {
-  const { setApiURL } = useData();
-  const { options: filterOptions, isLoading, error } = useFiltersData();
-  const [filters, setFilters] = useState({
-    status: '',
-    gender: '',
-    species: '',
-    name: '',
-    type: ''
-  });
+const initialFilters = {
+  status: '',
+  gender: '',
+  species: '',
+  name: '',
+  type: ''
+};
 
-  const handleApply = () => {
+export function Filters() {
+  const { setApiURL, setActivePage } = useData();
+  const { options: filterOptions, isLoading, error } = useFiltersData();
+  const {
+    appliedFilters,
+    draftFilters,
+    setDraftFilters,
+    applyFilters,
+    resetFilters,
+    hasUnappliedChanges
+  } = useUrlSync(initialFilters);
+
+  useEffect(() => {
     const params = new URLSearchParams();
 
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
+    Object.entries(appliedFilters).forEach(([key, value]) => {
+      if (value && value.trim() !== '') {
+        params.set(key, value);
+      }
     });
 
-    setApiURL(`${API_URL}?${params.toString()}`);
+    const newApiUrl = params.toString()
+      ? `${API_URL}?${params.toString()}`
+      : API_URL;
+
+    setApiURL(newApiUrl);
+    setActivePage(0);
+  }, [appliedFilters, setApiURL, setActivePage]);
+
+  const handleApply = () => {
+    applyFilters(draftFilters);
   };
 
   const handleReset = () => {
-    setFilters({
-      status: '',
-      gender: '',
-      species: '',
-      name: '',
-      type: ''
-    });
+    resetFilters();
+  };
 
-    setApiURL(API_URL);
+  const handleFilterChange = (key, value) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
   if (isLoading) {
@@ -63,36 +83,38 @@ export function Filters() {
         <SelectInput
           label="Status"
           options={filterOptions.status}
-          value={filters.status}
-          onChange={(v) => setFilters((p) => ({ ...p, status: v }))}
+          value={draftFilters.status}
+          onChange={(v) => handleFilterChange('status', v)}
         />
         <SelectInput
           label="Gender"
           options={filterOptions.gender}
-          value={filters.gender}
-          onChange={(v) => setFilters((p) => ({ ...p, gender: v }))}
+          value={draftFilters.gender}
+          onChange={(v) => handleFilterChange('gender', v)}
         />
         <SelectInput
           label="Species"
           options={filterOptions.species}
-          value={filters.species}
-          onChange={(v) => setFilters((p) => ({ ...p, species: v }))}
+          value={draftFilters.species}
+          onChange={(v) => handleFilterChange('species', v)}
         />
       </FilterGroup>
 
       <FilterGroup>
         <TextInput
           placeholder="Name"
-          value={filters.name}
-          onChange={(e) => setFilters((p) => ({ ...p, name: e.target.value }))}
+          value={draftFilters.name}
+          onChange={(e) => handleFilterChange('name', e.target.value)}
         />
         <TextInput
           placeholder="Type"
-          value={filters.type}
-          onChange={(e) => setFilters((p) => ({ ...p, type: e.target.value }))}
+          value={draftFilters.type}
+          onChange={(e) => handleFilterChange('type', e.target.value)}
         />
         <Actions>
-          <Button onClick={handleApply}>Apply</Button>
+          <Button onClick={handleApply} disabled={!hasUnappliedChanges}>
+            Apply
+          </Button>
           <Button variant="secondary" onClick={handleReset}>
             Reset
           </Button>

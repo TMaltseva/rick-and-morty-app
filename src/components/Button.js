@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
-export function Button({ children, onClick, variant }) {
+export function Button({ children, onClick, variant, disabled }) {
   return (
-    <StyledButton onClick={onClick} $variant={variant}>
+    <StyledButton onClick={onClick} $variant={variant} disabled={disabled}>
       {children}
     </StyledButton>
   );
@@ -24,14 +24,19 @@ const StyledButton = styled.button`
   font-size: 16px;
   letter-spacing: 0.5px;
 
-  &:hover {
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
     background: ${({ $variant }) =>
       $variant === 'secondary' ? '#ff5152' : '#83bf46'};
     color: #fff;
     transform: translateY(-1px);
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(0);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
   }
