@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { API_URL } from '../../api-config';
 import { useData } from '../providers';
 import { SelectInput } from '../SelectInput';
@@ -8,7 +8,6 @@ import { Button } from '../Button';
 import { useFiltersData } from './hooks/useFiltersData';
 import { useUrlSync } from './hooks/useUrlSync';
 import { Text } from '../common';
-
 const initialFilters = {
   status: '',
   gender: '',
@@ -46,20 +45,25 @@ export function Filters() {
     setActivePage(0);
   }, [appliedFilters, setApiURL, setActivePage]);
 
-  const handleApply = () => {
+  const handleSelectChange = useCallback(
+    (field) => (value) =>
+      setDraftFilters((prev) => ({ ...prev, [field]: value })),
+    [setDraftFilters]
+  );
+
+  const handleInputChange = useCallback(
+    (field) => (e) =>
+      setDraftFilters((prev) => ({ ...prev, [field]: e.target.value })),
+    [setDraftFilters]
+  );
+
+  const handleApply = useCallback(() => {
     applyFilters(draftFilters);
-  };
+  }, [applyFilters, draftFilters]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     resetFilters();
-  };
-
-  const handleFilterChange = (key, value) => {
-    setDraftFilters((prev) => ({
-      ...prev,
-      [key]: value
-    }));
-  };
+  }, [resetFilters]);
 
   if (isLoading) {
     return (
@@ -84,19 +88,19 @@ export function Filters() {
           label="Status"
           options={filterOptions.status}
           value={draftFilters.status}
-          onChange={(v) => handleFilterChange('status', v)}
+          onChange={handleSelectChange('status')}
         />
         <SelectInput
           label="Gender"
           options={filterOptions.gender}
           value={draftFilters.gender}
-          onChange={(v) => handleFilterChange('gender', v)}
+          onChange={handleSelectChange('gender')}
         />
         <SelectInput
           label="Species"
           options={filterOptions.species}
           value={draftFilters.species}
-          onChange={(v) => handleFilterChange('species', v)}
+          onChange={handleSelectChange('species')}
         />
       </FilterGroup>
 
@@ -104,12 +108,12 @@ export function Filters() {
         <TextInput
           placeholder="Name"
           value={draftFilters.name}
-          onChange={(e) => handleFilterChange('name', e.target.value)}
+          onChange={handleInputChange('name')}
         />
         <TextInput
           placeholder="Type"
           value={draftFilters.type}
-          onChange={(e) => handleFilterChange('type', e.target.value)}
+          onChange={handleInputChange('type')}
         />
         <Actions>
           <Button onClick={handleApply} disabled={!hasUnappliedChanges}>

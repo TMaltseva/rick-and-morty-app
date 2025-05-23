@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { ReactComponent as CloseIcon } from '../assets/icons/CrossIcon.svg';
 import { ReactComponent as ChevronIcon } from '../assets/icons/ShevronIcon.svg';
 
@@ -19,27 +19,42 @@ export function SelectInput({ label, options, value, onChange }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelect = (option) => {
-    onChange(option);
-    setIsOpen(false);
-  };
+  const handleToggle = useCallback(() => {
+    setIsOpen(!isOpen);
+  }, [isOpen]);
+
+  const handleSelect = useCallback(
+    (option) => {
+      onChange(option);
+      setIsOpen(false);
+    },
+    [onChange]
+  );
+
+  const handleClear = useCallback(
+    (e) => {
+      e.stopPropagation();
+      onChange('');
+    },
+    [onChange]
+  );
+
+  const createOptionClickHandler = useCallback(
+    (option) => () => handleSelect(option),
+    [handleSelect]
+  );
 
   return (
     <SelectContainer ref={selectRef}>
       <SelectWrapper>
         <SelectButton
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={handleToggle}
           $hasValue={!!value}
           $isOpen={isOpen}
         >
           {value || label}
           {value ? (
-            <ClearButton
-              onClick={(e) => {
-                e.stopPropagation();
-                onChange('');
-              }}
-            >
+            <ClearButton onClick={handleClear}>
               <StyledCloseIcon />
             </ClearButton>
           ) : (
@@ -54,7 +69,7 @@ export function SelectInput({ label, options, value, onChange }) {
             {options.map((option) => (
               <OptionItem
                 key={option}
-                onClick={() => handleSelect(option)}
+                onClick={createOptionClickHandler(option)}
                 $isSelected={option === value}
                 title={option}
               >
