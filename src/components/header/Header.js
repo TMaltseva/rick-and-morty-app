@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Logo } from './Logo';
-import { Filters } from '../Filters';
+import { Filters } from '../filters/Filters';
 
 export function Header() {
   return (

@@ -1,13 +1,16 @@
 import styled from 'styled-components';
 import { useState } from 'react';
-import { API_URL } from '../api-config';
-import { useData } from './providers';
-import { SelectInput } from './SelectInput';
-import { TextInput } from './TextInput';
-import { Button } from './Button';
+import { API_URL } from '../../api-config';
+import { useData } from '../providers';
+import { SelectInput } from '../SelectInput';
+import { TextInput } from '../TextInput';
+import { Button } from '../Button';
+import { useFiltersData } from './hooks/useFiltersData';
+import { Text } from '../common';
 
 export function Filters() {
   const { setApiURL } = useData();
+  const { options: filterOptions, isLoading, error } = useFiltersData();
   const [filters, setFilters] = useState({
     status: '',
     gender: '',
@@ -34,27 +37,44 @@ export function Filters() {
       name: '',
       type: ''
     });
+
     setApiURL(API_URL);
   };
+
+  if (isLoading) {
+    return (
+      <FiltersContainer>
+        <Text color="#83bf46">Loading filters...</Text>
+      </FiltersContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <FiltersContainer>
+        <Text color="#fff">Failed to load filters.</Text>
+      </FiltersContainer>
+    );
+  }
 
   return (
     <FiltersContainer>
       <FilterGroup>
         <SelectInput
           label="Status"
-          options={['Alive', 'Dead', 'unknown']}
+          options={filterOptions.status}
           value={filters.status}
           onChange={(v) => setFilters((p) => ({ ...p, status: v }))}
         />
         <SelectInput
           label="Gender"
-          options={['Female', 'Male', 'Genderless', 'unknown']}
+          options={filterOptions.gender}
           value={filters.gender}
           onChange={(v) => setFilters((p) => ({ ...p, gender: v }))}
         />
         <SelectInput
           label="Species"
-          options={['Human', 'Alien', 'Robot', 'Animal']}
+          options={filterOptions.species}
           value={filters.species}
           onChange={(v) => setFilters((p) => ({ ...p, species: v }))}
         />
@@ -84,7 +104,7 @@ export function Filters() {
 
 const FiltersContainer = styled.div`
   display: grid;
-  gap: 20px;
+  gap: 10px;
   padding: 20px;
   border-radius: 8px;
 
