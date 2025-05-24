@@ -109,7 +109,7 @@ src/
 
 ## 🌐 Online Version
 
-The application is deployed and available online at: **[Will be added after deployment]**
+The application is deployed and available online at: [**[Link]**](https://tmaltseva.github.io/rick-and-morty-app)
 
 ## 📱 Responsive Design
 
